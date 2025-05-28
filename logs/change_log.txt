@@ -1,0 +1,23 @@
+2025-05-27 02:24 UTC|Initialized PDF monitoring: https://dcamyanmar.com/dcadca/images/ATD/Pax_Freight_and_Mov_to_website_for_2025.pdf
+2025-05-27 02:24 UTC|Successful check, no change detected|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
+2025-05-27 02:30 UTC|Successful check, no change detected|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
+2025-05-28 03:26 UTC|Successful check, no change detected.EXITCODE:1|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
+Wed May 28 03:58:00 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:01:13 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:02:31 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:05:52 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:09:33 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:10:14 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:18:36 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:20:31 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:21:40 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:25:03 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:28:09 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:29:04 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:29:26 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:29:39 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:35:22 UTC 2025|FAILED:No matching PDF link with YYYY-MMM found. EXITCODE:20
+Wed May 28 04:53:58 UTC 2025|FAILED:No matching text with format YYYY-MMM found. EXITCODE:22
+2025-05-28 04:54 UTC|Successful check, no change detected.EXITCODE:1|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
+2025-05-28 05:08 UTC|Successful check, no change detected.EXITCODE:1|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
+2025-05-28 05:10 UTC|Successful check, no change detected.EXITCODE:1|a3748fb84a491467fd9980dcaa68858a6026c290c8f08824b57f5ed28270514a
