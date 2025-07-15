@@ -19,8 +19,31 @@ Thereby signaling if new data was added and removing the need to manually check 
 - Downloads and hashes the PDF
 - Compares it to the previous PDF hash created by the script
 - Logs the results
-- Sends a notification via NTFY to the topic "DCA_Data_Update" to inform if a difference in the PDF (name and/or content) was detected
+- Sends a notification via NTFY to the topic "DCA_Data_Update" to inform whether or not a difference in the PDF (name and/or content) was detected
+- Sends a notification vai webhook to Google Chat to inform only when a difference in the PDF (name and/or content) was detected
 - If the link text on the website is not updated, but the linked pdf is updated, then a change will still be detected.
+
+---
+
+## ✨ What’s New in This Version
+✅ Year based detection:
+Instead of hardcoding month names, the script now dynamically searches for any text containing a given year (configurable via CHECK_YEAR).
+✔️ Example: CHECK_YEAR="2025"
+
+✅ Focused HTML parsing:
+The script now extracts only the relevant <div class="text-download">…</div> section of the page before matching text and PDF links, improving speed and reducing false positives.
+
+✅ Improved logging format:
+All logs now use a consistent, pipe separated format for easier parsing: YYYY-MM-DD HH:MM UTC|Message text|HASH
+
+✅ Multi‑channel notifications:
+In addition to NTFY, the script can now also send updates to a Google Chat webhook (see CHAT_WEBHOOK variable).
+
+✅ Timezone awareness:
+Timestamps are now set to Myanmar Standard Time (MMT, UTC+6:30): export TZ="Asia/Yangon"
+
+✅ Cleaner configuration:
+All key variables (CHECK_YEAR, NTFY_URL, CHAT_WEBHOOK, etc.) are grouped at the top of the script for easy updates.
 
 ---
 
@@ -30,14 +53,19 @@ Thereby signaling if new data was added and removing the need to manually check 
 bash check_dca.sh
 This script can be automated with cron or systemd to check periodically.
 
-🔔 Notifications
+## 🔔 Notifications
+
+NTFY
 Uses ntfy.sh to send push messages.
 
 By default, the topic is: https://ntfy.sh/DCA_Data_Update
 
 You can subscribe to it from the web or a mobile app.
 
-📂 Output Files
+GOOGLE CHATS
+Uses Google Chat webhook to POST a message to specific Google Chat Space
+
+## 📂 Output Files & Logs
 File	Purpose
 /logs Stores the change_log
 change_log.txt	Append-only log of monitoring results
@@ -47,18 +75,21 @@ dca_temp.html html code extracted from dca website
 latest.pdf	Most recently downloaded report
 pdf_hash.txt	Stores last known hash & timestamp
 
+## 🛡️ Error Handling
+If no valid PDF link is found, a message is logged and sent.
 
+If the PDF fails to download, it notifies and exits.
 
-🛡️ Error Handling
-Separate exitcodes and NTFY notifications:
-- If no text matching the year you are searching for is found
-- If a match is found but there is no PDF file linked
-- If the download of the PDF file failes
-- If there is no previous hash indicating this is the first time the script is running
-- If the PDF is hashed but no change was detected
-- If the PDF is hased and a change is detected.
+✅ Exit Codes
+Code	Meaning
+0	First run initialized
+1	Success, no change
+2	Success, change detected
+20	No text or no PDF found
+21	PDF download failed
+>>>>>>> 84ca48d (WIP: saving changes before rebase)
 
-📦 Dependencies
+## 📦 Dependencies
 Make sure these are available:
 
 -curl
@@ -67,6 +98,6 @@ Make sure these are available:
 -sha256sum
 -ntfy.sh (no install needed — it's just a POST request to a public service)
 
-👤 Author
+## 👤 Author
 netzbrrr
 https://github.com/netzbrrr

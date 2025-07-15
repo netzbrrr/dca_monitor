@@ -146,13 +146,11 @@ echo "current hash at "$CURRENT_HASH_DATETIME" is "$CURRENT_HASH
 # Compare current hash with previous
 if [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
     echo "$NEW_HASH_LOG" > "$OLD_HASH_FILE"
-#Send to NTFY
     /usr/bin/curl -s -X POST "$NTFY_URL" -d "$(date): $CHANGE_MESSAGE" 
-#Send to Google Chat Webhook
     /usr/bin/curl -s -X POST \
-    -H 'Content-Type: application/json' \
+    -H 'Content-Type: application/json' \ 
     -d "{\"text\": \"$(date): $CHANGE_MESSAGE\"}" \
-    "$CHAT_WEBHOOK" > /dev/null
+    "$CHAT_WEBHOOK" > /dev/null 
     echo "$CURRENT_HASH_DATETIME|SUCCES:Successful check, change detected.EXITCODE:$EXIT_SUCCESS_CHANGE|$CURRENT_HASH" >> "$LOG_FILE"
     exit_with_message $EXIT_SUCCESS_CHANGE
 else
