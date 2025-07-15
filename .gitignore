@@ -1,0 +1,17 @@
+# Ignore Log Files 
+
+logs/
+*.log
+
+# Ignore Output files
+output/
+*.sav
+*.save
+*.save.*
+
+# Ignore temporary HTML dumps
+*.html
+
+# Ignore environment variables
+
+*.env
