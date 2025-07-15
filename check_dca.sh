@@ -12,9 +12,25 @@
 # --- Environment & Timezone ---
 export TZ="Asia/Yangon"
 
+# Always resolve the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Load variables from .env if it exists
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    set -a  # automatically export all variables
+    source "$SCRIPT_DIR/.env"
+    set +a
+else
+    echo "⚠️ No .env file found at $SCRIPT_DIR/.env"
+fi
+
+# Validate that required env vars are set
+: "${CHAT_WEBHOOK:?❌ CHAT_WEBHOOK environment variable is not set. Exiting.}"
+: "${NTFY_URL:?❌ NTFY_URL environment variable is not set. Exiting.}"
+
+
 # === Configuration ===
 URL="https://dcamyanmar.com/dcadca/index.php?option=com_content&view=article&id=29"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTPUT_DIR="$SCRIPT_DIR/output"
 LOG_DIR="$SCRIPT_DIR/logs"
 TMP_HTML="$OUTPUT_DIR/dca_tmp.html"
@@ -23,9 +39,7 @@ PDF_FILE="$OUTPUT_DIR/latest.pdf"
 OLD_HASH_FILE="$OUTPUT_DIR/pdf_hash.txt"
 LOG_FILE="$LOG_DIR/change_log.txt"
 NTFY_TOPIC="DCA_Data_Update"
-NTFY_URL="https://ntfy.sh/$NTFY_TOPIC"
 CHECK_YEAR="2025"
-CHAT_WEBHOOK="https://chat.googleapis.com/v1/spaces/AAAA12tvfVQ/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=cXduUwf0rv4Xmbom6yJV5aLn3YQjkLhacuFDqNArXTg"
 
 mkdir -p "$OUTPUT_DIR" "$LOG_DIR"
 
@@ -39,9 +53,8 @@ EXIT_SUCCESS_INITIALIZED=0  # Script ran successfully for first time. No prior h
 EXIT_SUCCESS_NOCHANGE=1     # Script ran successfully, no change in pdf detected
 EXIT_SUCCESS_CHANGE=2       # Script ran successfully, change in pdf detected
 EXIT_NO_TEXTMATCH_FOUND=20  # Script exited because no text matching $CHECK_YEAR was found in the html section
-EXIT_NO_PDF_FOUND=20        # Script exited because no PDF file was found
+EXIT_NO_PDF_FOUND=22        # Script exited because no PDF file was found
 EXIT_PDF_DOWNLOAD_FAILED=21 # Script exited because PDF could not be downloaded
-
 
 # === Exception Handling ===
 exit_with_message() {
