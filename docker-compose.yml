@@ -1,0 +1,23 @@
+version: "3.8"
+services:
+  dca-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dca-monitor
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Yangon
+      CHAT_WEBHOOK: ${CHAT_WEBHOOK}
+      NTFY_URL: ${NTFY_URL}
+      # Explicitly set 09:00 daily in case you override defaults elsewhere
+      CRON_SCHEDULE: "0 9 * * *"
+    volumes:
+      - dca-data:/data
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep crond >/dev/null && grep -q '.' /var/log/dca_monitor.log || true"]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+volumes:
+  dca-data:
