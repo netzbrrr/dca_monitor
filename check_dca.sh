@@ -1,7 +1,4 @@
-#!/bin/bash
-
-#to do
-# Make to log uniform, currently different formatting depending on the exit code
+#!/usr/bin/env bash
 
 #----------------------------------------------------------------------
 #Script: DCA Monitor
