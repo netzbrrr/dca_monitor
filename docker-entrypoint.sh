@@ -9,6 +9,7 @@ cat >/usr/local/bin/run-check.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 export TZ="${TZ:-Asia/Yangon}"
+export CHECK_YEAR="${CHECK_YEAR:-}"
 export CHAT_WEBHOOK="${CHAT_WEBHOOK:-}"
 export NTFY_URL="${NTFY_URL:-}"
 cd /app
