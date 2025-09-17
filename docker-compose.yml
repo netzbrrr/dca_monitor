@@ -12,6 +12,7 @@ services:
       NTFY_URL: ${NTFY_URL}
       # Explicitly set 09:00 daily in case you override defaults elsewhere
       CRON_SCHEDULE: "0 9 * * *"
+      CRON_BOOTSTRAP: "true" # run once immediately on (re)deploy
     volumes:
       - dca-data:/data
     healthcheck:
