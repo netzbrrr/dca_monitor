@@ -24,7 +24,7 @@ set -euo pipefail
 : "${CRON_SCHEDULE:=0 9 * * *}"   # default 09:00 MMT daily
 : "${CRON_BOOTSTRAP:=true}"       # run once on container start by default
 
-# Wrapper so cron gets env vars; mirror output to file + stdout
+# Wrapper so cron inherits env; mirror output to file + stdout
 cat >/usr/local/bin/run-check.sh <<'EOW'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -37,11 +37,11 @@ cd /app
 EOW
 chmod +x /usr/local/bin/run-check.sh
 
-# Install cron job
+# Install the cron job
 echo "${CRON_SCHEDULE} /usr/local/bin/run-check.sh" > /etc/crontabs/root
 echo "[dca_monitor] Cron installed: ${CRON_SCHEDULE} (TZ=${TZ:-Asia/Yangon})"
 
-# One-shot bootstrap (initialize hash/logs) if enabled
+# One-shot bootstrap to initialize baseline hash/logs
 if [ "${CRON_BOOTSTRAP}" = "true" ]; then
   echo "[dca_monitor] Bootstrap run on container start..."
   /usr/local/bin/run-check.sh || true
