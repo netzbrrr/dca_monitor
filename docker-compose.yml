@@ -6,14 +6,21 @@ services:
       dockerfile: Dockerfile
     container_name: dca-monitor
     restart: unless-stopped
+
+   # IMPORTANT: placeholders so Portainer can substitute values
     environment:
-      TZ: Asia/Yangon
-      CHECK_YEAR: ""
-      CHAT_WEBHOOK: ""
-      NTFY_URL: ""
-      # Explicitly set 09:00 daily in case you override defaults elsewhere
-      CRON_SCHEDULE: "0 9 * * *"
-      CRON_BOOTSTRAP: "true" # run once immediately on (re)deploy
+      CHECK_YEAR: ${CHECK_YEAR}
+      CHAT_WEBHOOK: ${CHAT_WEBHOOK}
+      NTFY_URL: ${NTFY_URL}
+      TZ: ${TZ:-Asia/Yangon}
+      CRON_SCHEDULE: ${CRON_SCHEDULE:-0 9 * * *}
+      CRON_BOOTSTRAP: ${CRON_BOOTSTRAP:-true}
+
+    # If you add 'stack.env' to the repo, Portainer (Git mode) will read it.
+    # Remove this if you prefer to ONLY use the Portainer Environment panel.
+    env_file:
+      - stack.env
+    
     volumes:
       - dca-data:/data
     healthcheck:
