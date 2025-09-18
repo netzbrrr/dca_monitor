@@ -1,57 +1,93 @@
-Changelog
+📑 Changelog
 
 All notable changes to this project will be documented in this file.
 
 [Unreleased]
 [1.1.0] – 2025-09-17
-Added
+✨ Added
 
-Environment variables:
+Environment variables
 
-CHECK_YEAR configurable via .env or Docker env.
+CHECK_YEAR → configurable via .env or Docker env.
 
-CHAT_WEBHOOK, NTFY_URL required for notifications.
+CHAT_WEBHOOK, NTFY_URL → required for notifications.
 
-CRON_SCHEDULE and CRON_BOOTSTRAP for containerized deployments.
+CRON_SCHEDULE, CRON_BOOTSTRAP → control containerized scheduling behavior.
 
-Docker support:
+Docker support
 
-Added Dockerfile and docker-compose.yml.
+New Dockerfile and docker-compose.yml.
 
-Container runs once on startup (bootstrap) then on schedule via cron.
+Container now runs once on startup (bootstrap) and then daily via cron.
 
 Portainer/Git deploys supported with stack.env.
 
-.env template auto-generation: On bare-metal, the script now creates a .env file with placeholders if missing.
+.env auto-generation
 
-System exit codes: unified and expanded (0 = init, 1 = no change, 2 = change, 20+ = errors).
+On bare-metal, the script creates a .env template with placeholders if missing.
 
-Improved README: clarified Docker usage and bare-metal instructions.
+Exit codes
 
-Changed
+Unified, expanded, and documented (0 = init, 1 = no change, 2 = change, 20+ = errors).
 
-HTML parsing limited to <div class="text-download"> section (faster, fewer false positives).
+Docs
 
-Logging format standardized to YYYY-MM-DD HH:MM UTC|Message|HASH.
+README updated with clear Docker + bare-metal instructions.
 
-Notifications improved:
+🔄 Changed
 
-NTFY receives all runs.
+HTML parsing
 
-Google Chat receives only change detections.
+Now restricted to <div class="text-download"> section → faster & fewer false positives.
 
-Timezone handling improved (TZ defaults to Asia/Yangon but configurable).
+Logging
 
-Fixed
+Standardized format:
 
-Docker builds now include all required dependencies (bash, curl, gawk, sha256sum, tzdata).
+YYYY-MM-DD HH:MM UTC | Message | HASH
 
-Missing CHECK_YEAR or misconfigured env vars now produce a clear exit code (23) and error message.
 
-Prevented accidental commit of secrets by updating .dockerignore.
+Notifications
+
+NTFY → receives all runs.
+
+Google Chat → receives only change detections.
+
+Timezone handling
+
+TZ defaults to Asia/Yangon, but configurable via env.
+
+🐛 Fixed
+
+Dependencies
+
+Docker image now includes all required tools: bash, curl, gawk, sha256sum, tzdata.
+
+Validation
+
+Missing CHECK_YEAR or misconfigured env vars now produce a clear error (exit 23).
+
+Security
+
+.dockerignore updated → prevents accidental commit of secrets (stack.env, .env).
 
 [1.0.0] – 2025-05-01
+🚀 Initial Release
 
-Initial release: Bash script monitoring DCA Myanmar PDF publications.
+Bash script monitoring DCA Myanmar PDF publications.
 
-Detects changes via hash comparison, logs results, sends ntfy + Google Chat notifications.
+Detects changes via hash comparison.
+
+Logs results locally.
+
+Sends notifications via ntfy.sh and Google Chat webhook.
+
+🔖 Versioning
+We follow Semantic Versioning
+:
+
+MAJOR → breaking changes.
+
+MINOR → new features, backward-compatible.
+
+PATCH → bug fixes only.
