@@ -1,103 +1,173 @@
-# DCA PDF Monitor
+DCA PDF Monitor
 
-A Bash script that monitors the **Department of Civil Aviation Myanmar** (DCA) website for newly published PDF reports. If a change is detected, it logs the update and sends a push notification via [ntfy.sh](https://ntfy.sh).
+A Bash script (and Docker container) that monitors the Department of Civil Aviation Myanmar (DCA) website for newly published PDF reports. If a change is detected, it logs the update and sends notifications.
 
-The Department of Civil Aviation in Myanmar publishes aggregated monthly data on the number of people that travel by Airplane. 
-The data is based on the flight manifests and shows for each of the Domestic and International Airports the total number of passengers (and cargo).
-Dat is split between departed and arrived number of people for each of the Airports in any given month. 
-The data is published on the website dca.gov.mm, but there is no fixed frequency in which it is updated. 
-There also is no notification function offered by dca.gov.mm. 
-This script will automatically compare the current data publication pdf on dca.gov.mm to the previously checked version in order to signal a change.
-Thereby signaling if new data was added and removing the need to manually check the website.
+The Department of Civil Aviation in Myanmar publishes aggregated monthly data on the number of passengers and cargo at domestic and international airports. Updates are irregular and the DCA does not offer notifications.
+This tool automates checking the website and notifies you when new data is published.
 
----
+📌 Features
 
-## 📌 What It Does
+Scrapes the DCA Myanmar publications page
+.
 
-- Scrapes the [DCA Myanmar Publications Page](https://dcamyanmar.com/dcadca/index.php?option=com_content&view=article&id=29)
-- Find the pdf report for the year identified in the script
-- Downloads and hashes the PDF
-- Compares it to the previous PDF hash created by the script
-- Logs the results
-- Sends a notification via NTFY to the topic "DCA_Data_Update" to inform whether or not a difference in the PDF (name and/or content) was detected
-- Sends a notification vai webhook to Google Chat to inform only when a difference in the PDF (name and/or content) was detected
-- If the link text on the website is not updated, but the linked pdf is updated, then a change will still be detected.
+Detects any report for the configured year (CHECK_YEAR).
 
----
+Downloads & hashes the PDF, compares with last known hash.
 
-## ✨ What’s New in This Version
-✅ Year based detection:
-Instead of hardcoding month names, the script now dynamically searches for any text containing a given year (configurable via CHECK_YEAR).
-✔️ Example: CHECK_YEAR="2025"
+Logs results in a structured, parse-friendly format.
 
-✅ Focused HTML parsing:
-The script now extracts only the relevant <div class="text-download">…</div> section of the page before matching text and PDF links, improving speed and reducing false positives.
+Sends notifications via:
 
-✅ Improved logging format:
-All logs now use a consistent, pipe separated format for easier parsing: YYYY-MM-DD HH:MM UTC|Message text|HASH
+ntfy.sh
+ → all updates
 
-✅ Multi‑channel notifications:
-In addition to NTFY, the script can now also send updates to a Google Chat webhook (see CHAT_WEBHOOK variable).
+Google Chat webhook → only when new data is detected
 
-✅ Timezone awareness:
-Timestamps are now set to Myanmar Standard Time (MMT, UTC+6:30): export TZ="Asia/Yangon"
+Timezone awareness: timestamps use Myanmar Standard Time (UTC+6:30).
 
-✅ Cleaner configuration:
-All key variables (CHECK_YEAR, NTFY_URL, CHAT_WEBHOOK, etc.) are grouped at the top of the script for easy updates.
+Can run bare-metal (cron/systemd) or in Docker (cron auto-configured).
 
----
+✨ What’s New
 
-## 🚀 Usage
+Env-based year detection: configure via CHECK_YEAR instead of editing the script.
 
-```bash
-bash check_dca.sh
-This script can be automated with cron or systemd to check periodically.
+Focused parsing: only scans the <div class="text-download"> section.
 
-## 🔔 Notifications
+Improved logs: YYYY-MM-DD HH:MM UTC|Message|HASH.
 
-NTFY
-Uses ntfy.sh to send push messages.
+Multi-channel notifications: NTFY + optional Google Chat webhook.
 
-By default, the topic is: https://ntfy.sh/DCA_Data_Update
+Docker ready: auto-runs once on container start to bootstrap, then daily at 09:00 MMT.
 
-You can subscribe to it from the web or a mobile app.
+.env handling:
 
-GOOGLE CHATS
-Uses Google Chat webhook to POST a message to specific Google Chat Space
+Docker → pass env vars in Portainer or via stack.env.
 
-## 📂 Output Files & Logs
-File	Purpose
-/logs Stores the change_log
-change_log.txt	Append-only log of monitoring results
-/output Stores all output files (below)
-dca_temp.html html code extracted from dca website
+Bare-metal → script auto-creates .env template if missing.
 
-latest.pdf	Most recently downloaded report
-pdf_hash.txt	Stores last known hash & timestamp
+⚙️ Configuration
+Required environment variables
 
-## 🛡️ Error Handling
-If no valid PDF link is found, a message is logged and sent.
+CHECK_YEAR → year to watch (e.g. 2025)
 
-If the PDF fails to download, it notifies and exits.
+NTFY_URL → ntfy topic URL (e.g. https://ntfy.sh/DCA_Data_Update)
 
-✅ Exit Codes
-Code	Meaning
-0	First run initialized
-1	Success, no change
-2	Success, change detected
-20	No text or no PDF found
-21	PDF download failed
->>>>>>> 84ca48d (WIP: saving changes before rebase)
+CHAT_WEBHOOK → Google Chat webhook URL
 
-## 📦 Dependencies
-Make sure these are available:
+Optional
 
--curl
--awk or gawk
--printf
--sha256sum
--ntfy.sh (no install needed — it's just a POST request to a public service)
+TZ → defaults to Asia/Yangon
 
-## 👤 Author
+CRON_SCHEDULE → defaults to 0 9 * * * (daily 09:00 MMT)
+
+CRON_BOOTSTRAP → run once on container start (true by default)
+
+🚀 Usage
+Bare-metal
+
+Clone repo and install deps (bash, curl, gawk, sha256sum):
+
+git clone https://github.com/netzbrrr/dca_monitor.git
+cd dca_monitor
+chmod +x check_dca.sh
+
+
+First run creates .env template if missing. Fill it, then run:
+
+./check_dca.sh
+
+
+Automate with cron:
+
+0 9 * * * cd /path/to/dca_monitor && ./check_dca.sh >> logs/cron.log 2>&1
+
+Docker / Portainer
+
+Deploy via docker-compose.yml:
+
+version: "3.8"
+services:
+  dca-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      CHECK_YEAR: ${CHECK_YEAR}
+      CHAT_WEBHOOK: ${CHAT_WEBHOOK}
+      NTFY_URL: ${NTFY_URL}
+      TZ: ${TZ:-Asia/Yangon}
+      CRON_SCHEDULE: ${CRON_SCHEDULE:-0 9 * * *}
+      CRON_BOOTSTRAP: ${CRON_BOOTSTRAP:-true}
+    env_file:
+      - stack.env
+    volumes:
+      - dca-data:/data
+volumes:
+  dca-data:
+
+
+For Portainer:
+
+If deploying via Web editor: set env vars in the Environment variables panel.
+
+If deploying via Git repository: commit a stack.env file in your repo with the required vars.
+
+On start, the container:
+
+Runs once immediately (to set baseline hash).
+
+Schedules daily check at 09:00 MMT.
+
+🔔 Notifications
+
+NTFY: Subscribe to your topic via the web or the ntfy mobile app.
+
+Google Chat: Configure a webhook in your space and set CHAT_WEBHOOK.
+
+📂 Output
+
+/logs/change_log.txt → append-only log of checks
+
+/output/latest.pdf → most recent report
+
+/output/pdf_hash.txt → last known hash + timestamp
+
+/output/dca_tmp.html → raw scraped HTML
+
+🛡️ Error Handling
+
+Exit codes:
+
+0 → First run initialized
+
+1 → Success, no change
+
+2 → Success, change detected
+
+20 → No text/PDF found
+
+21 → PDF download failed
+
+22 → No PDF file found
+
+23 → Env vars missing
+
+All errors are logged and trigger an ntfy notification.
+
+📦 Dependencies
+
+bash
+
+curl
+
+gawk
+
+sha256sum
+
+ntfy.sh (no install needed — plain HTTP POST)
+
+👤 Author
+
 netzbrrr
 https://github.com/netzbrrr
