@@ -101,40 +101,34 @@ echo "HTML Temp="$TMP_HTML
 SECTION_HTML=$(awk '/<div class="text-download">/,/<\/div>/' "$TMP_HTML")
 printf "%s\n" "$SECTION_HTML" > "$TMP_HTML_SECTION"
 
-# 3) Find the text that matches the check year (e.g., 2025 or 2025-MAY)
-TEXT_MATCH=$(
-  echo "$SECTION_HTML" | tr -d '\n' | gawk -v year="$CHECK_YEAR" '
+# 3) Find the anchor (YYYY or YYYY-MONTH) and capture its href
+PDF_HREF=$(
+  printf '%s' "$SECTION_HTML" | tr -d '\n' |
+  gawk -v year="$CHECK_YEAR" '
     BEGIN { IGNORECASE=1 }
-    match($0, ">" year "([[:space:]]*-[[:space:]]*[[:alpha:]]{3,})?[^<]*</a>", m) {
-      gsub(/<\/?[^>]+>/, "", m[0]);  # strip tags
-      gsub(/^[[:space:]>]+|[[:space:]]+$/, "", m[0]);
-      print m[0]; exit
-    }'
+    {
+      # Build a tolerant regex:
+      # <a ... href="(HREF)"> YEAR [ - MONTH(3+ letters) ] </a>
+      pattern = "<a[^>]*href=\"([^\"]+)\"[^>]*>[[:space:]]*" \
+                year "([[:space:]]*[-–][[:space:]]*[[:alpha:]]{3,})?[[:space:]]*</a>"
+      if (match($0, pattern, m)) { print m[1]; exit }
+    }
+  '
 )
 
-if [ -n "$TEXT_MATCH" ]; then
-  TEXT_URL_LINE=$(grep -F "$TEXT_MATCH" "$TMP_HTML_SECTION" || true)
-  echo "Matching text detected: $TEXT_MATCH"
-  [ -n "$TEXT_URL_LINE" ] && echo "Found in code line: $TEXT_URL_LINE"
-else
-  echo "$(date)|FAILED: No text found matching $CHECK_YEAR. EXITCODE:$EXIT_NO_TEXTMATCH_FOUND" >> "$LOG_FILE"
-  curl -fsS -X POST "$NTFY_URL" -d "No text found matching $CHECK_YEAR at $URL" || true
-  exit_with_message "$EXIT_NO_TEXTMATCH_FOUND" "No text found matching $CHECK_YEAR"
+if [ -z "$PDF_HREF" ]; then
+  echo "Exit 20: No matching PDF link (YYYY or YYYY-MMM) found at $URL"
+  exit 20
 fi
 
-# 4) Extract the PDF URL linked to the matched text
-PDF_URL=$(echo "$SECTION_HTML" | gawk -v year="$CHECK_YEAR" '
-  BEGIN { IGNORECASE=1 }
-  match($0, "<a[^>]+href=\"([^\"]+\\.pdf)\"[^>]*>" year "(-[A-Za-z]{3})?</a>", m) {
-    print m[1];
-    exit
-  }')
+# 4) Resolve relative URL to an absolute PDF URL
+case "$PDF_HREF" in
+  http*://*) PDF_URL="$PDF_HREF" ;;
+  /*)        PDF_URL="https://dcamyanmar.com$PDF_HREF" ;;
+  *)         PDF_URL="$(dirname "$URL")/$PDF_HREF" ;;
+esac
 
-if [ -z "$PDF_URL" ]; then
-  echo "$(date)|FAILED: No matching PDF link for $CHECK_YEAR. EXITCODE:$EXIT_NO_PDF_FOUND" >> "$LOG_FILE"
-  curl -fsS -X POST "$NTFY_URL" -d "No matching PDF link (YYYY or YYYY-MMM) found at $URL" || true
-  exit_with_message "$EXIT_NO_PDF_FOUND" "No matching PDF link found"
-fi
+echo "PDF URL: $PDF_URL"
 
 # 5) Handle relative URLs
 if [[ "$PDF_URL" != http* ]]; then
