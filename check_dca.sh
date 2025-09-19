@@ -104,10 +104,12 @@ printf "%s\n" "$SECTION_HTML" > "$TMP_HTML_SECTION"
 # 3) Find the text that matches the check year (e.g., 2025 or 2025-MAY)
 TEXT_MATCH=$(echo "$SECTION_HTML" | gawk -v year="$CHECK_YEAR" '
   BEGIN { IGNORECASE=1 }
-  match($0, ">" year "(-[A-Za-z]{3})?</a>", m) {
-    # m[0] = ">2025-MAY</a>" or ">2025</a>"
+  # allow optional hyphen + 3+ letters (e.g., -MAY, -JUNE, -SEPTEMBER)
+  # allow optional spaces around the hyphen and before </a>
+  match($0, ">" year "([[:space:]]*-[[:space:]]*[[:alpha:]]{3,})?[[:space:]]*</a>", m) {
     gsub(/<\/?[^>]+>/, "", m[0]);  # strip tags
-    gsub(/^>/, "", m[0]);          # remove leading >
+    gsub(/^[[:space:]>]+/, "", m[0]);
+    gsub(/[[:space:]]+$/, "", m[0]);
     print m[0];
     exit
   }')
