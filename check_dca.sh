@@ -102,17 +102,15 @@ SECTION_HTML=$(awk '/<div class="text-download">/,/<\/div>/' "$TMP_HTML")
 printf "%s\n" "$SECTION_HTML" > "$TMP_HTML_SECTION"
 
 # 3) Find the text that matches the check year (e.g., 2025 or 2025-MAY)
-TEXT_MATCH=$(echo "$SECTION_HTML" | gawk -v year="$CHECK_YEAR" '
-  BEGIN { IGNORECASE=1 }
-  # allow optional hyphen + 3+ letters (e.g., -MAY, -JUNE, -SEPTEMBER)
-  # allow optional spaces around the hyphen and before </a>
-  match($0, ">" year "([[:space:]]*-[[:space:]]*[[:alpha:]]{3,})?[[:space:]]*</a>", m) {
-    gsub(/<\/?[^>]+>/, "", m[0]);  # strip tags
-    gsub(/^[[:space:]>]+/, "", m[0]);
-    gsub(/[[:space:]]+$/, "", m[0]);
-    print m[0];
-    exit
-  }')
+TEXT_MATCH=$(
+  echo "$SECTION_HTML" | tr -d '\n' | gawk -v year="$CHECK_YEAR" '
+    BEGIN { IGNORECASE=1 }
+    match($0, ">" year "([[:space:]]*-[[:space:]]*[[:alpha:]]{3,})?[^<]*</a>", m) {
+      gsub(/<\/?[^>]+>/, "", m[0]);  # strip tags
+      gsub(/^[[:space:]>]+|[[:space:]]+$/, "", m[0]);
+      print m[0]; exit
+    }'
+)
 
 if [ -n "$TEXT_MATCH" ]; then
   TEXT_URL_LINE=$(grep -F "$TEXT_MATCH" "$TMP_HTML_SECTION" || true)
