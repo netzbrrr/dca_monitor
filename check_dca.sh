@@ -94,6 +94,9 @@ mkdir -p "$OUTPUT_DIR" "$LOG_DIR"
 # 1) Fetch page
 curl -fsSL -A "Mozilla/5.0" "$URL" -o "$TMP_HTML"
 
+echo "URL="$URL
+echo "HTML Temp="$TMP_HTML
+
 # 2) Extract relevant section
 SECTION_HTML=$(awk '/<div class="text-download">/,/<\/div>/' "$TMP_HTML")
 printf "%s\n" "$SECTION_HTML" > "$TMP_HTML_SECTION"
